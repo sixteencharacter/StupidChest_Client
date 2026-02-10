@@ -1,4 +1,4 @@
-from typing import Literal , Union
+from typing import Literal , Union , Dict
 from pydantic import BaseModel
 
 class ModuleStatUpdatePayload(BaseModel) :
@@ -12,10 +12,13 @@ class SimpleLogPayload(BaseModel) :
 class Patten2UnlockPayload(BaseModel) :
     command : Literal["lock","unlock"]
 
-class StandardizedMessage(BaseModel) :
-    type : Literal["MODULE_STATUS_UPDATE","DATA"]
-    payload : Union[ModuleStatUpdatePayload,SimpleLogPayload,Patten2UnlockPayload]
+class PatternModuleConfigMessage(BaseModel) :
+    type : Literal["PATTERN","PARAMETERS"]
+    cfgs : Dict[str,Union[str,int]]
 
+class StandardizedMessage(BaseModel) :
+    type : Literal["MODULE_STATUS_UPDATE","DATA","LOG"]
+    payload : Union[ModuleStatUpdatePayload,SimpleLogPayload,Patten2UnlockPayload,PatternModuleConfigMessage]
 
 class MessageFormatter :
     @staticmethod
@@ -28,3 +31,11 @@ class MessageFormatter :
     @staticmethod
     def parse_data_transfer(command : Literal["lock","unlock"]) :
         return StandardizedMessage(type="DATA",payload={"command":command}).model_dump()
+    
+    @staticmethod
+    def parse_config_payload(type : str,payload : any) :
+        return StandardizedMessage(type="DATA",payload={"cfgs" : payload,"type" : type}).model_dump()
+
+    @staticmethod
+    def parse_log(modName,context : str) :
+        return StandardizedMessage(type="LOG",payload={"moduleName":modName , "content" : context}).model_dump()

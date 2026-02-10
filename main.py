@@ -11,12 +11,13 @@ from typing import List
 from multiprocessing import Process
 from halo import Halo
 from time import sleep
+from typing import Tuple
 import termcolor
 
 processes : List[Process] = []
 moduleStatuses = dict()
 
-def setup_subscriber() -> zmq.SyncSocket :
+def setup_subscriber() -> Tuple[zmq.Context,zmq.SyncSocket] :
     context = zmq.Context()
     subscriber = context.socket(zmq.SUB)
     subscriber.setsockopt_string(zmq.SUBSCRIBE, "")
@@ -57,10 +58,9 @@ if __name__ == "__main__" :
             print(termcolor.colored(f"[ {moduleStatuses[mod]} ]",cmap) + f" {mod} module")
         # Logging stage
         while True :
-            # TODO: Add Logging logic printout here
-
-            # ================
-            sleep(1)
+            msg = main_subscriber.recv_json()
+            if msg["type"] == "LOG" :
+                print(f"[{msg["payload"]["moduleName"]}] {msg["payload"]["content"]}")
     except KeyboardInterrupt:
         main_subscriber.close()
         context.term()
