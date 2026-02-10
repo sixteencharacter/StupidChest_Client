@@ -3,6 +3,7 @@ import zmq
 import config
 import time
 from messages import MessageFormatter
+import serial
 
 class PC2SerialProc(Process) : 
     def __init__(self,*args,**kwargs) :
@@ -26,6 +27,12 @@ class PC2SerialProc(Process) :
                 # PAIR socket testing
                 # dat = self.pc2serialIn.recv_json()
                 # print(dat)
+                msg = self.pc2serialIn.recv_json()
+                if msg["payload"]["command"] == "unlock" :
+                    self.discovery_sock.send_json(MessageFormatter.parse_log(
+                        self.__class__.__name__,
+                        "Box unlock signal sent!"
+                    ))
                 
                 # ==================================
                 time.sleep(1) 

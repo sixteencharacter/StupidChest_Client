@@ -4,6 +4,8 @@ import config
 import time
 from messages import MessageFormatter
 
+import numpy as np
+
 class Serial2PCProc(Process) : 
     def __init__(self,*args,**kwargs) :
         super(Serial2PCProc,self).__init__(*args,**kwargs)
@@ -24,7 +26,11 @@ class Serial2PCProc(Process) :
                 # or traditional serial module and send it to the cloud worker to send the data
                 # up to the internet
 
+                # stub for testing purpose
+                dat = int(np.random.rand() * 1024)
+                # ============ end stub ===================
+                self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                 # ==================================
-                time.sleep(1)
+                time.sleep(0.1)
         except KeyboardInterrupt :
             pass 

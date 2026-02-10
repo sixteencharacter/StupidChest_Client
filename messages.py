@@ -1,5 +1,5 @@
-from typing import Literal , Union , Dict
-from pydantic import BaseModel
+from typing import Literal , Union , Dict , Any
+from pydantic import BaseModel 
 
 class ModuleStatUpdatePayload(BaseModel) :
     moduleName : str
@@ -9,16 +9,13 @@ class SimpleLogPayload(BaseModel) :
     moduleName : str
     content : str
 
-class Patten2UnlockPayload(BaseModel) :
-    command : Literal["lock","unlock"]
-
 class PatternModuleConfigMessage(BaseModel) :
     type : Literal["PATTERN","PARAMETERS"]
     cfgs : Dict[str,Union[str,int]]
 
 class StandardizedMessage(BaseModel) :
     type : Literal["MODULE_STATUS_UPDATE","DATA","LOG"]
-    payload : Union[ModuleStatUpdatePayload,SimpleLogPayload,Patten2UnlockPayload,PatternModuleConfigMessage]
+    payload : Union[ModuleStatUpdatePayload,SimpleLogPayload,PatternModuleConfigMessage,Dict[str,Any]]
 
 class MessageFormatter :
     @staticmethod
@@ -29,9 +26,9 @@ class MessageFormatter :
         }).model_dump()
     
     @staticmethod
-    def parse_data_transfer(command : Literal["lock","unlock"]) :
-        return StandardizedMessage(type="DATA",payload={"command":command}).model_dump()
-    
+    def parse_data_transfer(**kwargs) :
+        return StandardizedMessage(type="DATA",payload=kwargs).model_dump()
+
     @staticmethod
     def parse_config_payload(type : str,payload : any) :
         return StandardizedMessage(type="DATA",payload={"cfgs" : payload,"type" : type}).model_dump()

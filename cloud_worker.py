@@ -17,6 +17,9 @@ class CloudWorkerProc(Process) :
         self.serial2cloud.connect(f"{config.HOST}:{config.SERIAL2CLOUD_PORT}")
         self.pattern2cloud = context.socket(zmq.PAIR)
         self.pattern2cloud.connect(f"{config.HOST}:{config.PATTERN2CLOUD_PORT}")
+        self.poller = zmq.Poller()
+        self.poller.register(self.pattern2cloud , zmq.POLLIN)
+        self.poller.register(self.serial2cloud,zmq.POLLIN)
         try:
             while True :
                 # TODO : Add Cloud worker logic here
@@ -25,6 +28,14 @@ class CloudWorkerProc(Process) :
                 # must communicate with another module to adapt the config accordingly
                 # However, there's also a case where the MQTT failed. In that case we must
                 # Create an interval to fetch the config from the cloud.
+
+                socks = self.poller.poll(timeout=0.5)
+                if self.pattern2cloud in socks :
+                    # TODO : add the functionality to deliver data to the cloud
+                    pass
+                if self.serial2cloud in socks :
+                    # TODO : add the functionality to deliver data to the cloud
+                    pass
 
                 # ==================================
                 time.sleep(1) 
