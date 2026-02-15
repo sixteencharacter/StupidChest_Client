@@ -3,6 +3,28 @@ import zmq
 import config
 import time
 from messages import MessageFormatter
+import asyncio
+import aiomqtt
+import json
+
+async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.SyncSocket , serial2cloud_sock : zmq.SyncSocket) :
+    async with aiomqtt.Client("localhost") as client :
+        while True :
+
+            socks = poller.poll(timeout=0.5)
+            if pattern2cloud_sock in socks :
+                await client.publish(
+                    'knocklock/v1/devices/{}/knock/result'.format(config.DEVICE_ID),
+                    json.dumps(pattern2cloud_sock.recv_json()["payload"]["verdict"])
+                )
+
+            if serial2cloud_sock in socks :
+                await client.publish(
+                    'knocklock/v1/devices/{}/knock/live'.format(config.DEVICE_ID),
+                    json.dumps(serial2cloud_sock.recv_json()["payload"]["raw_data"])
+                )
+
+            time.sleep(0.1) 
 
 class CloudWorkerProc(Process) : 
     def __init__(self,*args,**kwargs) :
@@ -21,23 +43,6 @@ class CloudWorkerProc(Process) :
         self.poller.register(self.pattern2cloud , zmq.POLLIN)
         self.poller.register(self.serial2cloud,zmq.POLLIN)
         try:
-            while True :
-                # TODO : Add Cloud worker logic here
-                # In this module, we should listen to the MQTT from the server and beware about
-                # the config of the application, if there's a change in config, this module
-                # must communicate with another module to adapt the config accordingly
-                # However, there's also a case where the MQTT failed. In that case we must
-                # Create an interval to fetch the config from the cloud.
-
-                socks = self.poller.poll(timeout=0.5)
-                if self.pattern2cloud in socks :
-                    # TODO : add the functionality to deliver data to the cloud
-                    pass
-                if self.serial2cloud in socks :
-                    # TODO : add the functionality to deliver data to the cloud
-                    pass
-
-                # ==================================
-                time.sleep(1) 
+            asyncio.run(upload_data_to_cloud(self.poller,self.pattern2cloud , self.serial2cloud))
         except KeyboardInterrupt :
             pass

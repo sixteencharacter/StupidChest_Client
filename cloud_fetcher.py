@@ -20,19 +20,22 @@ class RuntimeConfig :
     configuration = None
 
 async def listen_cloud_config(discovery_sock : zmq.SyncSocket,cloud2patt_socket : zmq.SyncSocket) :
-    async with Client("localhost") as client:
-        await client.subscribe(f"knocklock/v1/devices/{config.DEVICE_ID}/config/#")
-        async for msg in client.messages :
-            if RuntimeConfig.configuration is not None :
-                RuntimeConfig.configuration["desired"]["data"] = json.loads(msg.payload.decode())["data"]
-                discovery_sock.send_json(MessageFormatter.parse_log(
-                    CloudFetcherProc.__name__,
-                    "Config changed to \n{}".format(json.dumps(RuntimeConfig.configuration,indent=4))
-                ))
-                cloud2patt_socket.send_json(MessageFormatter.parse_config_payload(
-                    type="PARAMETERS",
-                    payload = RuntimeConfig.configuration["desired"]["data"]
-                ))
+    try :
+        async with Client("localhost") as client:
+            await client.subscribe(f"knocklock/v1/devices/{config.DEVICE_ID}/config/#")
+            async for msg in client.messages :
+                if RuntimeConfig.configuration is not None :
+                    RuntimeConfig.configuration["desired"]["data"] = json.loads(msg.payload.decode())["data"]
+                    discovery_sock.send_json(MessageFormatter.parse_log(
+                        CloudFetcherProc.__name__,
+                        "Config changed to \n{}".format(json.dumps(RuntimeConfig.configuration,indent=4))
+                    ))
+                    cloud2patt_socket.send_json(MessageFormatter.parse_config_payload(
+                        type="PARAMETERS",
+                        payload = RuntimeConfig.configuration["desired"]["data"]
+                    ))
+    except KeyboardInterrupt:
+        pass
 
 class CloudFetcherProc(Process) : 
     def __init__(self,*args,**kwargs) :

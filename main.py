@@ -26,8 +26,10 @@ def setup_subscriber() -> Tuple[zmq.Context,zmq.SyncSocket] :
 
 def start_processes() :
     global processes
-    processes.append(Serial2PCProc())
-    processes.append(PC2SerialProc())
+    processes.append(Serial2PCProc(stub_mode=True)) # dev mode
+    processes.append(PC2SerialProc(stub_mode=True)) # dev mode
+    # processes.append(Serial2PCProc())
+    # processes.append(PC2SerialProc())
     processes.append(PatternRecogProc())
     processes.append(CloudWorkerProc())
     processes.append(CloudFetcherProc())
@@ -63,4 +65,5 @@ if __name__ == "__main__" :
                 print(f"[{msg["payload"]["moduleName"]}] {msg["payload"]["content"]}")
     except KeyboardInterrupt:
         main_subscriber.close()
+        cleanup_processes()
         context.term()
