@@ -3,7 +3,7 @@ import zmq
 import config
 import time
 from messages import MessageFormatter
-
+import serial
 import numpy as np
 
 class Serial2PCProc(Process) : 
@@ -14,23 +14,27 @@ class Serial2PCProc(Process) :
         self.discovery_sock = context.socket(zmq.PUB)
         self.discovery_sock.connect(f"{config.HOST}:{config.DISCOVERY_PORT}")
         time.sleep(2)
-        self.discovery_sock.send_json(MessageFormatter.parse_module_status("Serial2PC","Up"))
         self.serial2cloud_sock = context.socket(zmq.PAIR)
         self.serial2cloud_sock.bind(f"{config.HOST}:{config.SERIAL2CLOUD_PORT}")
         self.serial2pattern_sock = context.socket(zmq.PAIR)
         self.serial2pattern_sock.bind(f"{config.HOST}:{config.SERIAL2PATTERN_PORT}")
         try :
-            while True :
-                # TODO : Add Serial to PC logic here
-                # This module will read the data sent from the arduino using either pyserial
-                # or traditional serial module and send it to the cloud worker to send the data
-                # up to the internet
-
-                # stub for testing purpose
-                dat = int(np.random.rand() * 1024)
-                # ============ end stub ===================
-                self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
-                # ==================================
-                time.sleep(0.1)
-        except KeyboardInterrupt :
-            pass 
+            self.serial_conn = serial.Serial('/dev/serial0',baudrate=config.BAUDRATE,timeout=1)
+            self.discovery_sock.send_json(MessageFormatter.parse_module_status("Serial2PC","Up"))
+            try :
+                while True :
+                    if self.serial_conn.in_waiting > 0 :
+                        dat = int(self.serial_conn.readline().decode('utf8').rstip())
+                        self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
+                    time.sleep(0.1)
+            except KeyboardInterrupt :
+                pass
+            finally :
+                self.serial_conn.close()
+        except Exception as e:
+            self.discovery_sock.send_json(MessageFormatter.parse_module_status("Serial2PC","Down"))
+            time.sleep(2)
+            self.discovery_sock.send_json(MessageFormatter.parse_log(
+                self.__class__.__name__,
+                str(e)
+            ))

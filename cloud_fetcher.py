@@ -42,15 +42,18 @@ class CloudFetcherProc(Process) :
         self.discovery_sock = context.socket(zmq.PUB)
         self.discovery_sock.connect(f"{config.HOST}:{config.DISCOVERY_PORT}")
         time.sleep(2)
-        self.discovery_sock.send_json(MessageFormatter.parse_module_status("CloudFetcher","Up"))
         self.cloud2patt = context.socket(zmq.PAIR)
         self.cloud2patt.bind(f"{config.HOST}:{config.CLOUD2PATT_PORT}")
-        RuntimeConfig.configuration = requests.get(f"{config.API_BASE_PATH}/api/v1/devices/{config.DEVICE_ID}/config").json()
-        self.discovery_sock.send_json(MessageFormatter.parse_log(
-            self.__class__.__name__,
-            "Base config retrieved from API: \n{}".format(json.dumps(RuntimeConfig.configuration, indent=4))
-        ))
-        try:
-            asyncio.run(listen_cloud_config(self.discovery_sock,self.cloud2patt))
-        except KeyboardInterrupt :
-            pass 
+        try :
+            RuntimeConfig.configuration = requests.get(f"{config.API_BASE_PATH}/api/v1/devices/{config.DEVICE_ID}/config").json()
+            self.discovery_sock.send_json(MessageFormatter.parse_module_status("CloudFetcher","Up"))
+            self.discovery_sock.send_json(MessageFormatter.parse_log(
+                self.__class__.__name__,
+                "Base config retrieved from API: \n{}".format(json.dumps(RuntimeConfig.configuration, indent=4))
+            ))
+            try:
+                asyncio.run(listen_cloud_config(self.discovery_sock,self.cloud2patt))
+            except KeyboardInterrupt :
+                pass
+        except :
+            self.discovery_sock.send_json(MessageFormatter.parse_module_status("CloudFetcher","Down"))
