@@ -55,5 +55,9 @@ class CloudFetcherProc(Process) :
                 asyncio.run(listen_cloud_config(self.discovery_sock,self.cloud2patt))
             except KeyboardInterrupt :
                 pass
-        except :
+        except Exception as e:
             self.discovery_sock.send_json(MessageFormatter.parse_module_status("CloudFetcher","Down"))
+            self.discovery_sock.send_json(MessageFormatter.parse_log(
+                self.__class__.__name__,
+                str(e)
+            ))

@@ -16,7 +16,7 @@ class PC2SerialProc(Process) :
         self.pc2serialIn = context.socket(zmq.PAIR)
         self.pc2serialIn.bind(f"{config.HOST}:{config.PC2SERIAL2PATTERN_PORT}")
         try :
-            self.serial_conn = serial.Serial('/dev/serial0',baudrate=config.BAUDRATE,timeout=1)
+            self.serial_conn = serial.Serial(config.SERIAL_PORT,baudrate=config.BAUDRATE,timeout=1)
             self.discovery_sock.send_json(MessageFormatter.parse_module_status("PC2Serial","Up"))
             try:
                 while True :
