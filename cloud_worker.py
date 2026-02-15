@@ -10,18 +10,19 @@ import json
 async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.SyncSocket , serial2cloud_sock : zmq.SyncSocket) :
     async with aiomqtt.Client("localhost") as client :
         while True :
-
-            socks = poller.poll(timeout=0.5)
+            socks = dict(poller.poll(timeout=0.5))
             if pattern2cloud_sock in socks :
                 await client.publish(
                     'knocklock/v1/devices/{}/knock/result'.format(config.DEVICE_ID),
-                    json.dumps(pattern2cloud_sock.recv_json()["payload"]["verdict"])
+                    json.dumps(pattern2cloud_sock.recv_json()["payload"]["verdict"]),
+                    qos=2
                 )
 
             if serial2cloud_sock in socks :
                 await client.publish(
                     'knocklock/v1/devices/{}/knock/live'.format(config.DEVICE_ID),
-                    json.dumps(serial2cloud_sock.recv_json()["payload"]["raw_data"])
+                    json.dumps(serial2cloud_sock.recv_json()["payload"]["raw_data"]),
+                    qos=2
                 )
 
             time.sleep(0.1) 
