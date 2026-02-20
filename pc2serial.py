@@ -31,14 +31,14 @@ class PC2SerialProc(Process) :
                             self.__class__.__name__,
                             "Box unlock signal sent!"
                         ))
-                    else :
-                        if not self.stub_mode :
-                            self.serial_conn.write(b'{}\n'.format(config.LOCK_COMMAND))
-                        self.discovery_sock.send_json(MessageFormatter.parse_log(
-                            self.__class__.__name__,
-                            "Box lock signal sent!"
-                        ))                
-                    time.sleep(1) 
+                    # else :
+                    #     if not self.stub_mode :
+                    #         self.serial_conn.write(b'{}\n'.format(config.LOCK_COMMAND))
+                    #     self.discovery_sock.send_json(MessageFormatter.parse_log(
+                    #         self.__class__.__name__,
+                    #         "Box lock signal sent!"
+                    #     ))                
+                    time.sleep(0.1) 
             except KeyboardInterrupt :
                 pass 
             finally :

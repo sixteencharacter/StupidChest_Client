@@ -21,7 +21,7 @@ class RuntimeConfig :
 
 async def listen_cloud_config(discovery_sock : zmq.SyncSocket,cloud2patt_socket : zmq.SyncSocket) :
     try :
-        async with Client("localhost") as client:
+        async with Client(config.MQTT_HOST) as client:
             await client.subscribe(f"knocklock/v1/devices/{config.DEVICE_ID}/config/#")
             async for msg in client.messages :
                 if RuntimeConfig.configuration is not None :

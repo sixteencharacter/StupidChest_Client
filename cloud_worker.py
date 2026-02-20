@@ -8,7 +8,7 @@ import aiomqtt
 import json
 
 async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.SyncSocket , serial2cloud_sock : zmq.SyncSocket) :
-    async with aiomqtt.Client("localhost") as client :
+    async with aiomqtt.Client(config.MQTT_HOST) as client :
         while True :
             socks = dict(poller.poll(timeout=0.5))
             if pattern2cloud_sock in socks :
