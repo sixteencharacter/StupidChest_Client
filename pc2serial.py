@@ -28,6 +28,7 @@ class PC2SerialProc(Process) :
                         if not self.stub_mode :
                             with config.serial_lock :
                                 self.serial_conn.write(b'{}\n'.format(config.UNLOCK_COMMAND))
+                                print("unlock command sent")
                         self.discovery_sock.send_json(MessageFormatter.parse_log(
                             self.__class__.__name__,
                             "Box unlock signal sent!"
