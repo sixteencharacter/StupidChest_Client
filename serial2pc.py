@@ -31,7 +31,8 @@ class Serial2PCProc(Process) :
                         if self.stub_mode :
                             dat = int(np.random.random() * 1024)
                         else :
-                            dat = int(self.serial_conn.readline())
+                            dat = 1
+                            print(self.serial_conn.readline())
                         self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                         self.serial2cloud_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                     time.sleep(0.1)
