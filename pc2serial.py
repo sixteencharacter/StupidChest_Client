@@ -41,6 +41,8 @@ class PC2SerialProc(Process) :
                     time.sleep(0.1) 
             except KeyboardInterrupt :
                 pass 
+            except Exception as e :
+                print(str(e))
             finally :
                 if not self.stub_mode :
                     self.serial_conn.close()

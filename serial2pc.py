@@ -5,7 +5,7 @@ import time
 from messages import MessageFormatter
 import serial
 import numpy as np
-
+import traceback
 class Serial2PCProc(Process) : 
     def __init__(self,*args,**kwargs) :
         super(Serial2PCProc,self).__init__()
@@ -31,6 +31,7 @@ class Serial2PCProc(Process) :
                         if self.stub_mode :
                             dat = int(np.random.random() * 1024)
                         else :
+                            print(dat)
                             dat = int(self.serial_conn.readline().decode('utf8').rstip())
                         self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                         self.serial2cloud_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
