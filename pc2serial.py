@@ -40,7 +40,7 @@ class PC2SerialProc(Process) :
                     #         self.__class__.__name__,
                     #         "Box lock signal sent!"
                     #     ))                
-                    time.sleep(0.1) 
+                    time.sleep(0.5) 
             except KeyboardInterrupt :
                 pass 
             except Exception as e :

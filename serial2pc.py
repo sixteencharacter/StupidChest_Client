@@ -40,7 +40,7 @@ class Serial2PCProc(Process) :
                                 print(e)
                         self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                         self.serial2cloud_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
-                    time.sleep(0.1)
+                    time.sleep(0.5)
             except KeyboardInterrupt :
                 pass
             except Exception as e :
