@@ -16,38 +16,25 @@ class PC2SerialProc(Process) :
         time.sleep(2)
         self.pc2serialIn = context.socket(zmq.PAIR)
         self.pc2serialIn.bind(f"{config.HOST}:{config.PC2SERIAL2PATTERN_PORT}")
+        self.writeSocket = context.socket(zmq.PAIR)
+        self.writeSocket.bind(f"{config.HOST}:{config.SERIAL_W_PORT}")
         try :
-            self.serial_conn = None
-            if not self.stub_mode :
-                self.serial_conn = serial.Serial(config.SERIAL_PORT,baudrate=config.BAUDRATE,timeout=1)
             self.discovery_sock.send_json(MessageFormatter.parse_module_status("PC2Serial","Up"))
             try:
                 while True :
                     msg = self.pc2serialIn.recv_json()
                     if msg["payload"]["command"] == "unlock" :
-                        if not self.stub_mode :
-                            with config.serial_lock :
-                                self.serial_conn.write(b'{}\n'.format(config.UNLOCK_COMMAND))
-                                print("unlock command sent")
+                        print(msg)
+                        self.writeSocket.send_json(MessageFormatter.parse_data_transfer(command="unlock"))
                         self.discovery_sock.send_json(MessageFormatter.parse_log(
                             self.__class__.__name__,
                             "Box unlock signal sent!"
-                        ))
-                    # else :
-                    #     if not self.stub_mode :
-                    #         self.serial_conn.write(b'{}\n'.format(config.LOCK_COMMAND))
-                    #     self.discovery_sock.send_json(MessageFormatter.parse_log(
-                    #         self.__class__.__name__,
-                    #         "Box lock signal sent!"
-                    #     ))                
+                        ))                
                     time.sleep(0.5) 
             except KeyboardInterrupt :
                 pass 
             except Exception as e :
                 print(str(e))
-            finally :
-                if not self.stub_mode :
-                    self.serial_conn.close()
         except Exception as e:
             self.discovery_sock.send_json(MessageFormatter.parse_module_status("PC2Serial","Down"))
             time.sleep(2)

@@ -2,11 +2,12 @@
 
 import zmq
 import config 
-from serial2pc import Serial2PCProc
+# from serial2pc import Serial2PCProc
 from pc2serial import PC2SerialProc
 from pattern_recog import PatternRecogProc
 from cloud_fetcher import CloudFetcherProc
 from cloud_worker import CloudWorkerProc
+from serial_broker import SerialBrokerProc
 from typing import List
 from multiprocessing import Process
 from halo import Halo
@@ -26,10 +27,8 @@ def setup_subscriber() -> Tuple[zmq.Context,zmq.SyncSocket] :
 
 def start_processes() :
     global processes
-    # processes.append(Serial2PCProc(stub_mode=True)) # dev mode
-    processes.append(PC2SerialProc(stub_mode=True)) # dev mode
-    processes.append(Serial2PCProc())
-    # processes.append(PC2SerialProc())
+    processes.append(PC2SerialProc())
+    processes.append(SerialBrokerProc())
     processes.append(PatternRecogProc())
     processes.append(CloudWorkerProc())
     processes.append(CloudFetcherProc())
