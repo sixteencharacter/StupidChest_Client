@@ -26,7 +26,8 @@ class PC2SerialProc(Process) :
                     msg = self.pc2serialIn.recv_json()
                     if msg["payload"]["command"] == "unlock" :
                         if not self.stub_mode :
-                            self.serial_conn.write(b'{}\n'.format(config.UNLOCK_COMMAND))
+                            with config.serial_lock :
+                                self.serial_conn.write(b'{}\n'.format(config.UNLOCK_COMMAND))
                         self.discovery_sock.send_json(MessageFormatter.parse_log(
                             self.__class__.__name__,
                             "Box unlock signal sent!"

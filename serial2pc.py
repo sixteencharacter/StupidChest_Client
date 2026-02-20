@@ -33,7 +33,8 @@ class Serial2PCProc(Process) :
                         else :
                             dat = 0
                             try :
-                                dat = self.serial_conn.readline().decode("utf-8",errors='ignore').rstrip()
+                                with config.serial_lock :
+                                    dat = self.serial_conn.readline().decode("utf-8",errors='ignore').rstrip()
                             except Exception as e :
                                 print(e)
                         self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
