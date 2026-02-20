@@ -31,9 +31,9 @@ class Serial2PCProc(Process) :
                         if self.stub_mode :
                             dat = int(np.random.random() * 1024)
                         else :
-                            dat = 1
+                            dat = 0
                             try :
-                                print(self.serial_conn.readline().decode("utf-8",errors='ignore').rstrip())
+                                dat = self.serial_conn.readline().decode("utf-8",errors='ignore').rstrip()
                             except Exception as e :
                                 print(e)
                         self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
