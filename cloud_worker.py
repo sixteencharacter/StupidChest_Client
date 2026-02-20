@@ -8,24 +8,26 @@ import aiomqtt
 import json
 
 async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.SyncSocket , serial2cloud_sock : zmq.SyncSocket) :
-    async with aiomqtt.Client(config.MQTT_HOST) as client :
-        while True :
-            socks = dict(poller.poll(timeout=0.5))
-            if pattern2cloud_sock in socks :
-                await client.publish(
-                    'knocklock/v1/devices/{}/knock/result'.format(config.DEVICE_ID),
-                    json.dumps(pattern2cloud_sock.recv_json()["payload"]["verdict"]),
-                    qos=2
-                )
+    while True :
+        socks = dict(poller.poll(timeout=0.5))
+        try :
+            async with aiomqtt.Client(config.MQTT_HOST,timeout=1000) as client :
+                if pattern2cloud_sock in socks :
+                    await client.publish(
+                        'knocklock/v1/devices/{}/knock/result'.format(config.DEVICE_ID),
+                        json.dumps(pattern2cloud_sock.recv_json()["payload"]["verdict"]),
+                        qos=2
+                    )
 
-            if serial2cloud_sock in socks :
-                await client.publish(
-                    'knocklock/v1/devices/{}/knock/live'.format(config.DEVICE_ID),
-                    json.dumps(serial2cloud_sock.recv_json()["payload"]["raw_data"]),
-                    qos=2
-                )
-
-            time.sleep(0.1) 
+                if serial2cloud_sock in socks :
+                    await client.publish(
+                        'knocklock/v1/devices/{}/knock/live'.format(config.DEVICE_ID),
+                        json.dumps(serial2cloud_sock.recv_json()["payload"]["raw_data"]),
+                        qos=2
+                    )
+        except Exception as e :
+            print(e)
+        time.sleep(0.1) 
 
 class CloudWorkerProc(Process) : 
     def __init__(self,*args,**kwargs) :
