@@ -25,7 +25,7 @@ class PC2SerialProc(Process) :
                     msg = self.pc2serialIn.recv_json()
                     if msg["payload"]["command"] == "unlock" :
                         print(msg)
-                        self.writeSocket.send_json(MessageFormatter.parse_data_transfer(command="unlock"))
+                        # self.writeSocket.send_json(MessageFormatter.parse_data_transfer(command="unlock"))
                         self.discovery_sock.send_json(MessageFormatter.parse_log(
                             self.__class__.__name__,
                             "Box unlock signal sent!"
