@@ -18,6 +18,6 @@ PATTERN_BUFFER_SIZE = 32
 BAUDRATE = 115200
 LOCK_COMMAND="C"
 UNLOCK_COMMAND="O"
-SERIAL_PORT = 'COM3'
+SERIAL_PORT = '/dev/ttyS0'
 
 serial_lock = threading.Lock()
