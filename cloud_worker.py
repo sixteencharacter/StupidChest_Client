@@ -14,9 +14,15 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
         try :
             async with aiomqtt.Client(config.MQTT_HOST,timeout=1000) as client :
                 if pattern2cloud_sock in socks :
+                    recv_data = pattern2cloud_sock.recv_json()
                     await client.publish(
                         'knocklock/v1/devices/{}/knock/result'.format(config.DEVICE_ID),
-                        json.dumps(pattern2cloud_sock.recv_json()["payload"]["verdict"]),
+                        json.dumps(recv_data["payload"]["verdict"]),
+                        qos=2
+                    )
+                    await client.publish(
+                        'knocklock/v1/devices/{}/knock/logs'.format(config.DEVICE_ID),
+                        json.dumps(recv_data),
                         qos=2
                     )
 

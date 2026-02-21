@@ -6,6 +6,7 @@ import json
 from messages import MessageFormatter
 from dataclasses import dataclass
 import numpy as np
+import datetime
 
 @dataclass
 class PatternConfig :
@@ -85,13 +86,7 @@ class PatternRecogProc(Process) :
                             PatternCache.patt = [1e6] * config.PATTERN_BUFFER_SIZE
                             PatternCache.currentIdx = 0
                             PatternCache.on_timestamp = time.time() * 1000
-                
-                    # For debugging purpose
-                    # self.discovery_sock.send_json(MessageFormatter.parse_log(
-                    #     self.__class__.__name__,
-                    #     "Pattern record now changed to \n{}\n".format(PatternCache.patt)
-                    # ))
-
+            
                     # Run the pattern similarity test
                     simScore = find_pattern_similarity(PatternCache.patt)
                     simVerdict =  simScore > 0.8
@@ -103,7 +98,8 @@ class PatternRecogProc(Process) :
 
                     self.pattern2cloud.send_json(MessageFormatter.parse_data_transfer(
                         pattern=PatternCache.patt,
-                        verdict=simVerdict
+                        verdict=simVerdict,
+                        timestamp=datetime.datetime.isoformat()
                     ))
 
                 # ==================================
