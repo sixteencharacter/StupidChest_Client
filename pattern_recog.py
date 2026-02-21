@@ -19,6 +19,7 @@ class PatternCache :
     currentIdx = 0
 
 def find_pattern_similarity(arr : list) -> float :
+    # TODO : write the valid pattern similarity module
     # begin stub ====================
     # if np.random.rand() > 0.7 :
     #     sim = np.random.rand() * 50 + 50
@@ -50,10 +51,6 @@ class PatternRecogProc(Process) :
         self.poller.register(self.cloud2patt,zmq.POLLIN)
         try :
             while True :
-                # In this module , we must store the local system config from the pipe exposed from
-                # the config fetcher module and calculate the similarity of the data using the mean
-                # square error or any relevant comparision
-                
                 socks = dict(self.poller.poll(timeout=500))
                 if self.cloud2patt in socks :
                     msg = self.cloud2patt.recv_json()
@@ -71,11 +68,6 @@ class PatternRecogProc(Process) :
                         ))
                 if self.serial2patt in socks :
                     msg = self.serial2patt.recv_json()
-                    # TODO : add the preprocessing logic to the pattern recognition module 
-                    # (also the cache of the signal) after the signal is processed , the module
-                    # will run the pattern processing and if the unlock attemp is created this
-                    # module will contact with other modules to deliver the unlock command to
-                    # the box and the access log to the cloud
                     if PatternConfig.config is not None :
                         verdict = msg["payload"]["raw_data"] > PatternConfig.config["threshold"]
                         if verdict :
@@ -93,7 +85,7 @@ class PatternRecogProc(Process) :
 
                     # Logging to cloud and take action with the serial
                     self.patt2pc2serial.send_json(MessageFormatter.parse_data_transfer(
-                        command="unlock" if simVerdict else "lock" # TODO: make this a configurable variable
+                        command="unlock" if simVerdict else "lock"
                     ))
 
                     self.pattern2cloud.send_json(MessageFormatter.parse_data_transfer(

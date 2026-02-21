@@ -2,7 +2,6 @@
 
 import zmq
 import config 
-# from serial2pc import Serial2PCProc
 from pc2serial import PC2SerialProc
 from pattern_recog import PatternRecogProc
 from cloud_fetcher import CloudFetcherProc

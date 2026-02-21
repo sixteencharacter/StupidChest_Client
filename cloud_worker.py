@@ -7,8 +7,8 @@ import asyncio
 import aiomqtt
 import json
 
+# Async Task Loop
 async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.SyncSocket , serial2cloud_sock : zmq.SyncSocket) :
-    print("hit the first loop")
     while True :
         socks = dict(poller.poll(timeout=0.5))
         try :

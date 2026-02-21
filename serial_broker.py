@@ -16,8 +16,6 @@ class SerialBrokerProc(Process) :
         self.discovery_sock.send_json(MessageFormatter.parse_module_status("SerialBroker","Up"))
         self.writeSocket = context.socket(zmq.PAIR)
         self.writeSocket.connect(f"{config.HOST}:{config.SERIAL_W_PORT}")
-        self.readSocket = context.socket(zmq.PAIR)
-        self.readSocket.connect(f"{config.HOST}:{config.SERIAL_R_PORT}")
         self.serial2cloud_sock = context.socket(zmq.PAIR)
         self.serial2cloud_sock.bind(f"{config.HOST}:{config.SERIAL2CLOUD_PORT}")
         self.serial2pattern_sock = context.socket(zmq.PAIR)

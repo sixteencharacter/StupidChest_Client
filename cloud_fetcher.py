@@ -1,24 +1,20 @@
-# imports
-from multiprocessing import Process
 import zmq
-import config
+import json
 import time
-from messages import MessageFormatter
-from aiomqtt import Client
+import config
 import asyncio
 import requests
-import json
+from aiomqtt import Client
 from dataclasses import dataclass
+from multiprocessing import Process
+from messages import MessageFormatter
 
-# logging
-# import logging
-# logger = logging.Logger(__name__)
-# logging.basicConfig(level=logging.DEBUG,filemode="w",filename="run.log")
-
+# In memory cache
 @dataclass
 class RuntimeConfig :
     configuration = None
 
+# Asyncio Task Loop
 async def listen_cloud_config(discovery_sock : zmq.SyncSocket,cloud2patt_socket : zmq.SyncSocket) :
     try :
         while True :
@@ -40,7 +36,7 @@ async def listen_cloud_config(discovery_sock : zmq.SyncSocket,cloud2patt_socket 
                 print(e)
             asyncio.sleep(1)
     except KeyboardInterrupt:
-        pass
+        pass # Graceful Shutdown
 
 class CloudFetcherProc(Process) : 
     def __init__(self,*args,**kwargs) :
