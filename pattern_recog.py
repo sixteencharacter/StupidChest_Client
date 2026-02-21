@@ -20,6 +20,7 @@ class PatternCache :
 
 def find_pattern_similarity(arr : list) -> float :
     # TODO : write the valid pattern similarity module
+    # TODO : add realistic stub mode for the serial broker (read)
     # begin stub ====================
     # if np.random.rand() > 0.7 :
     #     sim = np.random.rand() * 50 + 50
@@ -32,6 +33,7 @@ def find_pattern_similarity(arr : list) -> float :
 class PatternRecogProc(Process) : 
     def __init__(self,*args,**kwargs) :
         super(PatternRecogProc,self).__init__(*args,**kwargs)
+        self.stub_mode = kwargs["stub_mode"] if "stub_mode" in kwargs else False
     def run(self) :
         context = zmq.Context()
         self.discovery_sock = context.socket(zmq.PUB)

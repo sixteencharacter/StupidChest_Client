@@ -5,9 +5,12 @@ import time
 from messages import MessageFormatter
 import serial
 
+# TODO : add realistic stub mode for the serial broker (read)
+
 class SerialBrokerProc(Process) : 
     def __init__(self,*args,**kwargs) :
         super(SerialBrokerProc,self).__init__(*args,**kwargs)
+        self.stub_mode = kwargs["stub_mode"] if "stub_mode" in kwargs else False
     def run(self) :
         context = zmq.Context()
         self.discovery_sock = context.socket(zmq.PUB)

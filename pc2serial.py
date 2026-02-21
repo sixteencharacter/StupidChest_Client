@@ -8,7 +8,6 @@ import serial
 class PC2SerialProc(Process) : 
     def __init__(self,*args,**kwargs) :
         super(PC2SerialProc,self).__init__()
-        self.stub_mode = kwargs["stub_mode"] if "stub_mode" in kwargs else False
     def run(self) :
         context = zmq.Context()
         self.discovery_sock = context.socket(zmq.PUB)
