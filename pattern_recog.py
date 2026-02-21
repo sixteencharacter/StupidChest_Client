@@ -19,10 +19,11 @@ class PatternCache :
 
 def find_pattern_similarity(arr : list) -> float :
     # begin stub ====================
-    if np.random.rand() > 0.7 :
-        sim = np.random.rand() * 50 + 50
-    else :
-        sim = 0.3
+    # if np.random.rand() > 0.7 :
+    #     sim = np.random.rand() * 50 + 50
+    # else :
+    #     sim = 0.3
+    return 0
     # end stub
     return sim
 
