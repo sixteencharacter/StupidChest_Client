@@ -28,13 +28,16 @@ class SerialBrokerProc(Process) :
         try:
             while True :
                 socks = dict(self.poller.poll(timeout=0.1))
-                if self.serial_conn.in_waiting > 0 :
-                    dat = int(self.serial_conn.readline().decode("utf-8",errors='ignore').rstrip())
-                    print(type(dat),dat)
-                    self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
-                    self.serial2cloud_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
-                if self.writeSocket in socks :
-                    self.serial_conn.write(config.UNLOCK_COMMAND.encode())
+                try :
+                    if self.serial_conn.in_waiting > 0 :
+                        dat = int(self.serial_conn.readline().decode("utf-8",errors='ignore').rstrip())
+                        print(type(dat),dat)
+                        self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
+                        self.serial2cloud_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
+                    if self.writeSocket in socks :
+                        self.serial_conn.write(config.UNLOCK_COMMAND.encode())
+                except :
+                    pass
                 time.sleep(0.1)
         except KeyboardInterrupt :
             pass
