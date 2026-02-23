@@ -22,8 +22,8 @@ def calc_sliding_window(a,b) :
     # assume array a is longer than b
     min_mse = 1e6
     if a.size() > 0 and b.size() > 0 :
-        for i in range(a.size() - b.size()) :
-            curr_mse = np.pow(a[i:i+b.size()] - b,2) / b.size()
+        for i in range(a.size - b.size) :
+            curr_mse = np.pow(a[i:i+b.size] - b,2) / b.size
             min_mse = min(min_mse,curr_mse)
     return min_mse
 
@@ -32,7 +32,7 @@ def find_pattern_similarity(arr : list) -> float :
     if PatternConfig.pattern_representation is not None :
         gt_arr = np.array(PatternConfig.pattern_representation)
         inp_arr = np.array([a for a in arr if a != cutoff_delay])
-        if gt_arr.size() > inp_arr.size() :
+        if gt_arr.size > inp_arr.size :
             return calc_sliding_window(gt_arr,inp_arr)
         else :
             return calc_sliding_window(inp_arr,gt_arr)
