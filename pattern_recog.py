@@ -28,6 +28,7 @@ def calc_sliding_window(a,b) :
         b = (b - mu_b) / sigma_b
         for i in range(a.size - b.size) :
             curr_rmse = np.sqrt(np.pow(a[i:i+b.size] - b,2).sum() / b.size)
+            print("MSE[{},{}] {}".format(i,i+a.size,curr_rmse))
             min_rmse = min(min_rmse,curr_rmse)
     return min_rmse
 
