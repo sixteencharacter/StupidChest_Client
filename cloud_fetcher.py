@@ -19,10 +19,12 @@ async def listen_cloud_config(discovery_sock : zmq.SyncSocket,cloud2patt_socket 
     try :
         while True :
             try :
+                # TODO : listen to pattern change from cloud
                 async with Client(config.MQTT_HOST,timeout=1000) as client:
                     await client.subscribe(f"knocklock/v1/devices/{config.DEVICE_ID}/config/#")
                     async for msg in client.messages :
                         if RuntimeConfig.configuration is not None :
+                            print("CONFIG from cloud: {}".format(msg.payload.decode()))
                             RuntimeConfig.configuration["desired"]["data"] = json.loads(msg.payload.decode())["data"]
                             discovery_sock.send_json(MessageFormatter.parse_log(
                                 CloudFetcherProc.__name__,

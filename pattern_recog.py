@@ -10,7 +10,7 @@ import datetime
 
 @dataclass
 class PatternConfig :
-    pattern_representation = None
+    pattern_representation = config.DUMMY_PATTERN
     config = None
 
 class PatternCache :
@@ -18,17 +18,24 @@ class PatternCache :
     on_timestamp = time.time() * 1000
     currentIdx = 0
 
+def calc_sliding_window(a,b) :
+    # assume array a is longer than b
+    min_mse = 1e6
+    if a.size() > 0 and b.size() > 0 :
+        for i in range(a.size() - b.size()) :
+            curr_mse = np.pow(a[i:i+b.size()] - b,2) / b.size()
+            min_mse = min(min_mse,curr_mse)
+    return min_mse
+
 def find_pattern_similarity(arr : list) -> float :
-    # TODO : write the valid pattern similarity module
-    # TODO : add realistic stub mode for the serial broker (read)
-    # begin stub ====================
-    # if np.random.rand() > 0.7 :
-    #     sim = np.random.rand() * 50 + 50
-    # else :
-    #     sim = 0.3
-    return 0
-    # end stub
-    return sim
+    cutoff_delay = 1e6
+    if PatternConfig.pattern_representation is not None :
+        gt_arr = np.array(PatternConfig.pattern_representation)
+        inp_arr = np.array([a for a in arr if a != cutoff_delay])
+        if gt_arr.size() > inp_arr.size() :
+            return calc_sliding_window(gt_arr,inp_arr)
+        else :
+            return calc_sliding_window(inp_arr,gt_arr)
 
 class PatternRecogProc(Process) : 
     def __init__(self,*args,**kwargs) :
@@ -71,19 +78,24 @@ class PatternRecogProc(Process) :
                 if self.serial2patt in socks :
                     msg = self.serial2patt.recv_json()
                     if PatternConfig.config is not None :
-                        verdict = msg["payload"]["raw_data"] > PatternConfig.config["threshold"]
+                        verdict = msg["payload"]["raw_data"] > PatternConfig.config["activation_threshold"]
+                        print(verdict)
                         if verdict :
                             PatternCache.patt[PatternCache.currentIdx] = (time.time() * 1000) - PatternCache.on_timestamp
                             PatternCache.on_timestamp = time.time() * 1000
                             PatternCache.currentIdx = (PatternCache.currentIdx + 1) % config.PATTERN_BUFFER_SIZE
-                        if time.time() - PatternCache.on_timestamp > config.IDLE_CUTOFF_PERIOD :
+                        elif time.time() - PatternCache.on_timestamp > config.IDLE_CUTOFF_PERIOD :
                             PatternCache.patt = [1e6] * config.PATTERN_BUFFER_SIZE
                             PatternCache.currentIdx = 0
                             PatternCache.on_timestamp = time.time() * 1000
             
                     # Run the pattern similarity test
                     simScore = find_pattern_similarity(PatternCache.patt)
-                    simVerdict =  simScore > 0.8
+                    self.discovery_sock.send_json(MessageFormatter.parse_log(
+                        self.__class__.__name__,
+                        "MSE: {}\n".format(simScore)
+                    ))
+                    simVerdict =  simScore < PatternConfig.config["predict_threshold"]
 
                     # Logging to cloud and take action with the serial
                     self.patt2pc2serial.send_json(MessageFormatter.parse_data_transfer(
