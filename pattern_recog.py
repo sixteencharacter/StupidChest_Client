@@ -99,7 +99,6 @@ class PatternRecogProc(Process) :
                         self.__class__.__name__,
                         "MSE: {}\n".format(simScore)
                     ))
-                    print(PatternConfig.config)
                     if PatternConfig.config is not None :
 
                         simVerdict =  simScore < PatternConfig.config["predict_threshold"]
@@ -111,7 +110,7 @@ class PatternRecogProc(Process) :
 
                         self.pattern2cloud.send_json(MessageFormatter.parse_data_transfer(
                             pattern=PatternCache.patt,
-                            verdict=simVerdict,
+                            verdict=str(simVerdict),
                             timestamp=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
                         ))
 
