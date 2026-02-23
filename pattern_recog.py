@@ -95,7 +95,7 @@ class PatternRecogProc(Process) :
                             PatternCache.patt[0] = msg["payload"]["raw_data"]
             
                     # Run the pattern similarity test
-                    simScore = find_pattern_similarity(PatternCache.patt,PatternCache.currentIdx)
+                    simScore = find_pattern_similarity(PatternCache.patt)
                     self.discovery_sock.send_json(MessageFormatter.parse_log(
                         self.__class__.__name__,
                         "RMSE: {}\n".format(simScore)
