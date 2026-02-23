@@ -95,12 +95,15 @@ class PatternRecogProc(Process) :
                         self.__class__.__name__,
                         "MSE: {}\n".format(simScore)
                     ))
-                    simVerdict =  simScore < PatternConfig.config["predict_threshold"]
+                    print(PatternConfig.config)
+                    if PatternConfig.config is not None :
 
-                    # Logging to cloud and take action with the serial
-                    self.patt2pc2serial.send_json(MessageFormatter.parse_data_transfer(
-                        command="unlock" if simVerdict else "lock"
-                    ))
+                        simVerdict =  simScore < PatternConfig.config["predict_threshold"]
+
+                        # Logging to cloud and take action with the serial
+                        self.patt2pc2serial.send_json(MessageFormatter.parse_data_transfer(
+                            command="unlock" if simVerdict else "lock"
+                        ))
 
                     self.pattern2cloud.send_json(MessageFormatter.parse_data_transfer(
                         pattern=PatternCache.patt,
