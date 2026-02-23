@@ -19,7 +19,7 @@ class PatternCache :
     currentIdx = 0
 
 def calc_rmse(a,b) :
-    rmse = np.sqrt(np.pow(a - b,2).sum() / b.size)
+    rmse = np.sqrt(np.pow(np.array(a) - np.array(b),2).sum() / b.size)
     return rmse
 
 def find_pattern_similarity() -> float :
