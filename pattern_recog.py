@@ -91,7 +91,7 @@ class PatternRecogProc(Process) :
                                 PatternCache.currentIdx = (PatternCache.currentIdx + 1) % config.PATTERN_BUFFER_SIZE
             
                     # Run the pattern similarity test
-                    simScore = find_pattern_similarity(PatternCache.patt)
+                    simScore = find_pattern_similarity()
                     self.discovery_sock.send_json(MessageFormatter.parse_log(
                         self.__class__.__name__,
                         "RMSE: {}\n".format(simScore)
