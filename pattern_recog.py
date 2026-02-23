@@ -105,11 +105,11 @@ class PatternRecogProc(Process) :
                             command="unlock" if simVerdict else "lock"
                         ))
 
-                    self.pattern2cloud.send_json(MessageFormatter.parse_data_transfer(
-                        pattern=PatternCache.patt,
-                        verdict=simVerdict,
-                        timestamp=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-                    ))
+                        self.pattern2cloud.send_json(MessageFormatter.parse_data_transfer(
+                            pattern=PatternCache.patt,
+                            verdict=simVerdict,
+                            timestamp=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                        ))
 
                 # ==================================
         except KeyboardInterrupt:
