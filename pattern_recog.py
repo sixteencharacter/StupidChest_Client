@@ -18,29 +18,19 @@ class PatternCache :
     on_timestamp = time.time() * 1000
     currentIdx = 0
 
-def calc_sliding_window(a,b) :
-    # assume array a is longer than b
-    min_rmse = np.inf
-    if a.size > 0 and b.size > 0 :
-        # mu_a , sigma_a = a.mean() , a.var()
-        # mu_b , sigma_b = b.mean() , b.var()
-        # a = (a - mu_a) / np.clip(sigma_a,0.01,np.inf)
-        # b = (b - mu_b) / np.clip(sigma_b,0.01,np.inf)
-        for i in range(a.size - b.size) :
-            curr_rmse = np.sqrt(np.pow(a[i:i+b.size] - b,2).sum() / b.size)
-            print("MSE[{},{}] {}".format(i,i+a.size,curr_rmse))
-            min_rmse = min(min_rmse,curr_rmse)
-    return min_rmse
+def calc_rmse(a,b) :
+    rmse = np.sqrt(np.pow(a - b,2).sum() / b.size)
+    return rmse
 
-def find_pattern_similarity(arr : list) -> float :
+def find_pattern_similarity() -> float :
     cutoff_delay = 1e6
-    if PatternConfig.pattern_representation is not None :
-        gt_arr = np.array(PatternConfig.pattern_representation)
-        inp_arr = np.array([a for a in arr if a != cutoff_delay])
-        if gt_arr.size > inp_arr.size :
-            return calc_sliding_window(gt_arr,inp_arr)
-        else :
-            return calc_sliding_window(inp_arr,gt_arr)
+    filtered_array = [p for p in PatternCache.patt if p < cutoff_delay]
+    if len(filtered_array) >= len(PatternConfig.pattern_representation) :
+        return calc_rmse(
+            filtered_array[:len(PatternConfig.pattern_representation)],
+            PatternConfig.pattern_representation
+        )
+    return np.inf
 
 class PatternRecogProc(Process) : 
     def __init__(self,*args,**kwargs) :
@@ -83,17 +73,22 @@ class PatternRecogProc(Process) :
                 if self.serial2patt in socks :
                     msg = self.serial2patt.recv_json()
                     if PatternConfig.config is not None :
-                        verdict = msg["payload"]["raw_data"] > PatternConfig.config["activation_threshold"]
+                        activation = msg["payload"]["raw_data"] > PatternConfig.config["activation_threshold"]
                         # print(verdict)
-                        if verdict :
-                            PatternCache.patt[PatternCache.currentIdx] = (time.time() * 1000) - PatternCache.on_timestamp
-                            PatternCache.on_timestamp = time.time() * 1000
-                            PatternCache.currentIdx = (PatternCache.currentIdx + 1) % config.PATTERN_BUFFER_SIZE
-                        elif time.time() - PatternCache.on_timestamp > config.IDLE_CUTOFF_PERIOD :
-                            PatternCache.patt = [1e6] * config.PATTERN_BUFFER_SIZE
-                            PatternCache.currentIdx = 0
-                            PatternCache.on_timestamp = time.time() * 1000
-                            PatternCache.patt[0] = msg["payload"]["raw_data"]
+                        if activation :
+                            
+                            t_now = time.time() * 1000
+                            t_diff = t_now - PatternCache.on_timestamp
+
+                            if t_diff > config.IDLE_CUTOFF_PERIOD :
+                                PatternCache.patt = [1e6] * config.PATTERN_BUFFER_SIZE
+                                PatternCache.on_timestamp = time.time() * 1000
+                                PatternCache.on_timestamp = t_now
+                                PatternCache.patt[0] = 0
+                                PatternCache.currentIdx = 1
+                            else :
+                                PatternCache.patt[PatternCache.currentIdx] = t_diff
+                                PatternCache.currentIdx = (PatternCache.currentIdx + 1) % config.PATTERN_BUFFER_SIZE
             
                     # Run the pattern similarity test
                     simScore = find_pattern_similarity(PatternCache.patt)
