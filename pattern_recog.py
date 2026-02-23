@@ -20,12 +20,16 @@ class PatternCache :
 
 def calc_sliding_window(a,b) :
     # assume array a is longer than b
-    min_mse = np.inf
+    min_rmse = np.inf
     if a.size > 0 and b.size > 0 :
+        mu_a , sigma_a = a.mean() , a.var()
+        mu_b , sigma_b = b.mean() , b.var()
+        a = (a - mu_a) / sigma_a
+        b = (b - mu_b) / sigma_b
         for i in range(a.size - b.size) :
-            curr_mse = np.pow(a[i:i+b.size] - b,2).sum() / b.size
-            min_mse = min(min_mse,curr_mse)
-    return min_mse
+            curr_rmse = np.sqrt(np.pow(a[i:i+b.size] - b,2).sum() / b.size)
+            min_rmse = min(min_rmse,curr_rmse)
+    return min_rmse
 
 def find_pattern_similarity(arr : list) -> float :
     cutoff_delay = 1e6
