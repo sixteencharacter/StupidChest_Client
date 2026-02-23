@@ -97,11 +97,12 @@ class PatternRecogProc(Process) :
                     simScore = find_pattern_similarity(PatternCache.patt)
                     self.discovery_sock.send_json(MessageFormatter.parse_log(
                         self.__class__.__name__,
-                        "MSE: {}\n".format(simScore)
+                        "RMSE: {}\n".format(simScore)
                     ))
                     if PatternConfig.config is not None :
 
                         simVerdict =  simScore < PatternConfig.config["predict_threshold"]
+                        print("Sim verdict: ",simVerdict)
 
                         # Logging to cloud and take action with the serial
                         self.patt2pc2serial.send_json(MessageFormatter.parse_data_transfer(
