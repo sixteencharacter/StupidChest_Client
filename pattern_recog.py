@@ -22,10 +22,10 @@ def calc_sliding_window(a,b) :
     # assume array a is longer than b
     min_rmse = np.inf
     if a.size > 0 and b.size > 0 :
-        mu_a , sigma_a = a.mean() , a.var()
-        mu_b , sigma_b = b.mean() , b.var()
-        a = (a - mu_a) / np.clip(sigma_a,0.01,np.inf)
-        b = (b - mu_b) / np.clip(sigma_b,0.01,np.inf)
+        # mu_a , sigma_a = a.mean() , a.var()
+        # mu_b , sigma_b = b.mean() , b.var()
+        # a = (a - mu_a) / np.clip(sigma_a,0.01,np.inf)
+        # b = (b - mu_b) / np.clip(sigma_b,0.01,np.inf)
         for i in range(a.size - b.size) :
             curr_rmse = np.sqrt(np.pow(a[i:i+b.size] - b,2).sum() / b.size)
             print("MSE[{},{}] {}".format(i,i+a.size,curr_rmse))
