@@ -22,6 +22,7 @@ def calc_sliding_window(a,b) :
     # assume array a is longer than b
     min_mse = 1e6
     if a.size > 0 and b.size > 0 :
+        print(b,"slide over",a)
         for i in range(a.size - b.size) :
             curr_mse = np.pow(a[i:i+b.size] - b,2).sum() / b.size
             min_mse = min(min_mse,curr_mse)
