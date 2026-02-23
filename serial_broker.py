@@ -36,6 +36,7 @@ class SerialBrokerProc(Process) :
                         self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                         self.serial2cloud_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                     if self.writeSocket in socks :
+                        self.writeSocket.recv()
                         self.serial_conn.write(config.UNLOCK_COMMAND.encode())
                         self.serial_conn.reset_output_buffer()
                 except :
