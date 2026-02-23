@@ -104,6 +104,11 @@ class PatternRecogProc(Process) :
                         simVerdict =  simScore < PatternConfig.config["predict_threshold"]
                         print("Sim verdict: ",simVerdict)
 
+                        if simVerdict : 
+                            PatternCache.patt = [1e6] * config.PATTERN_BUFFER_SIZE
+                            PatternCache.currentIdx = 0
+                            PatternCache.on_timestamp = time.time() * 1000
+
                         # Logging to cloud and take action with the serial
                         self.patt2pc2serial.send_json(MessageFormatter.parse_data_transfer(
                             command="unlock" if simVerdict else "lock"
