@@ -83,7 +83,7 @@ class PatternRecogProc(Process) :
                     msg = self.serial2patt.recv_json()
                     if PatternConfig.config is not None :
                         verdict = msg["payload"]["raw_data"] > PatternConfig.config["activation_threshold"]
-                        print(verdict)
+                        # print(verdict)
                         if verdict :
                             PatternCache.patt[PatternCache.currentIdx] = (time.time() * 1000) - PatternCache.on_timestamp
                             PatternCache.on_timestamp = time.time() * 1000
@@ -102,7 +102,7 @@ class PatternRecogProc(Process) :
                     if PatternConfig.config is not None :
 
                         simVerdict =  simScore < PatternConfig.config["predict_threshold"]
-                        print("Sim verdict: ",simVerdict)
+                        # print("Sim verdict: ",simVerdict)
 
                         if simVerdict : 
                             PatternCache.patt = [1e6] * config.PATTERN_BUFFER_SIZE

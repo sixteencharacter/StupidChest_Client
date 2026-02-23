@@ -32,7 +32,7 @@ class SerialBrokerProc(Process) :
                 try :
                     if self.serial_conn.in_waiting > 0 :
                         dat = int(self.serial_conn.readline().decode("utf-8",errors='ignore').rstrip())
-                        print(type(dat),dat)
+                        # print(type(dat),dat)
                         self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                         self.serial2cloud_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                     if self.writeSocket in socks :
