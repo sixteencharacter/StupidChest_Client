@@ -105,6 +105,7 @@ class PatternRecogProc(Process) :
                         # print("Sim verdict: ",simVerdict)
 
                         if simVerdict : 
+                            PatternConfig.last_sent_time = time.time() * 1000
                             PatternCache.patt = [1e6] * config.PATTERN_BUFFER_SIZE
                             PatternCache.currentIdx = 0
                             PatternCache.on_timestamp = time.time() * 1000

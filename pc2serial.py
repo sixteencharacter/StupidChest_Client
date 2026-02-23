@@ -3,7 +3,12 @@ import zmq
 import config
 import time
 from messages import MessageFormatter
-import serial
+from dataclasses import dataclass
+
+@dataclass
+class SerialConfig:
+    last_sent_time  = time.time() * 1000
+
 
 class PC2SerialProc(Process) : 
     def __init__(self,*args,**kwargs) :
@@ -23,11 +28,13 @@ class PC2SerialProc(Process) :
                 while True :
                     msg = self.pc2serialIn.recv_json()
                     if msg["payload"]["command"] == "unlock" :
-                        self.writeSocket.send_json(MessageFormatter.parse_data_transfer(command="unlock"))
-                        self.discovery_sock.send_json(MessageFormatter.parse_log(
-                            self.__class__.__name__,
-                            "Box unlock signal sent!"
-                        ))                
+                        if time.time() * 1000 - SerialConfig.last_sent_time > 5000 :
+                            self.writeSocket.send_json(MessageFormatter.parse_data_transfer(command="unlock"))
+                            self.discovery_sock.send_json(MessageFormatter.parse_log(
+                                self.__class__.__name__,
+                                "Box unlock signal sent!"
+                            ))                
+                            SerialConfig.last_sent_time = time.time() * 1000
                     time.sleep(0.1) 
             except KeyboardInterrupt :
                 pass 
