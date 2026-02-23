@@ -41,6 +41,25 @@ def find_pattern_similarity(arr : list) -> float :
         else :
             return calc_sliding_window(inp_arr,gt_arr)
 
+def find_pattern_similarity_ai(arr : list, current_idx: int) -> float :
+    cutoff_delay = 1e6
+    if PatternConfig.pattern_representation is not None :
+        # Unwrap circular buffer: [Oldest Data -> Newest Data]
+        ordered_patt = arr[current_idx:] + arr[:current_idx]
+        
+        gt_arr = np.array(PatternConfig.pattern_representation)
+        inp_arr = np.array([a for a in ordered_patt if a != cutoff_delay])
+        
+        # Guard: Need at least 2-3 points to form a pattern, else RMSE is inf
+        if inp_arr.size < 3:
+            return 1e6
+
+        if gt_arr.size > inp_arr.size :
+            return calc_sliding_window(gt_arr,inp_arr)
+        else :
+            return calc_sliding_window(inp_arr,gt_arr)
+    return 1e6
+
 class PatternRecogProc(Process) : 
     def __init__(self,*args,**kwargs) :
         super(PatternRecogProc,self).__init__(*args,**kwargs)
@@ -94,7 +113,7 @@ class PatternRecogProc(Process) :
                             PatternCache.on_timestamp = time.time() * 1000
             
                     # Run the pattern similarity test
-                    simScore = find_pattern_similarity(PatternCache.patt)
+                    simScore = find_pattern_similarity_ai(PatternCache.patt,PatternCache.currentIdx)
                     self.discovery_sock.send_json(MessageFormatter.parse_log(
                         self.__class__.__name__,
                         "RMSE: {}\n".format(simScore)
