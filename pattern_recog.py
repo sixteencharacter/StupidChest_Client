@@ -55,37 +55,34 @@ class PatternRecogProc(Process) :
         self.poller.register(self.cloud2patt,zmq.POLLIN)
         try :
             while True :
+                # print("current GT is",PatternConfig.pattern_representation)
                 socks = dict(self.poller.poll(timeout=500))
                 if self.cloud2patt in socks :
                     msg = self.cloud2patt.recv_json()
                     if msg["payload"]["type"] == "PARAMETERS" :
                         PatternConfig.config = msg["payload"]["cfgs"]
+                        PatternConfig.pattern_representation = msg["payload"]["cfgs"]["pattern_representation"]
                         self.discovery_sock.send_json(MessageFormatter.parse_log(
                             self.__class__.__name__,
                             "Received config: \n{}".format(json.dumps(msg["payload"],indent=4))
                         ))
-                    elif msg["payload"]["type"] == "PATTERN" :
-                        PatternConfig.pattern_representation = msg["payload"]["cfgs"]
-                        self.discovery_sock.send_json(MessageFormatter.parse_log(
-                            self.__class__.__name__,
-                            "Received pattern config: \n{}".format(json.dumps(msg["payload"],indent=4))
-                        ))
                 if self.serial2patt in socks :
                     msg = self.serial2patt.recv_json()
+                    amp = msg["payload"]["raw_data"]
+                    t_now = time.time() * 1000
+                    t_diff = t_now - PatternCache.on_timestamp
                     if PatternConfig.config is not None :
                         activation = msg["payload"]["raw_data"] > PatternConfig.config["activation_threshold"]
-                        # print(verdict)
-                        if activation :
-                            
-                            t_now = time.time() * 1000
-                            t_diff = t_now - PatternCache.on_timestamp
 
-                            if t_diff > config.IDLE_CUTOFF_PERIOD :
+                        if activation :
+
+                            if t_diff > PatternConfig.config["idle_cutoff_period"] :
                                 PatternCache.patt = [1e6] * config.PATTERN_BUFFER_SIZE
                                 PatternCache.on_timestamp = time.time() * 1000
                                 PatternCache.on_timestamp = t_now
                                 PatternCache.patt[0] = 0
                                 PatternCache.currentIdx = 1
+
                             else :
                                 PatternCache.patt[PatternCache.currentIdx] = t_diff
                                 PatternCache.currentIdx = (PatternCache.currentIdx + 1) % config.PATTERN_BUFFER_SIZE
@@ -99,7 +96,6 @@ class PatternRecogProc(Process) :
                     if PatternConfig.config is not None :
 
                         simVerdict =  simScore < PatternConfig.config["predict_threshold"]
-                        # print("Sim verdict: ",simVerdict)
 
                         if simVerdict : 
                             PatternConfig.last_sent_time = time.time() * 1000
@@ -115,7 +111,9 @@ class PatternRecogProc(Process) :
                         self.pattern2cloud.send_json(MessageFormatter.parse_data_transfer(
                             pattern=PatternCache.patt,
                             verdict=str(simVerdict),
-                            timestamp=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                            timestamp=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                            tOffset=int(t_diff),
+                            amp=int(amp)
                         ))
 
                 # ==================================
