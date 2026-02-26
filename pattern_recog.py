@@ -86,8 +86,9 @@ class PatternRecogProc(Process) :
                             else :
                                 PatternCache.patt[PatternCache.currentIdx] = t_diff
                                 PatternCache.currentIdx = (PatternCache.currentIdx + 1) % config.PATTERN_BUFFER_SIZE
-            
+                                PatternCache.on_timestamp = time.time() * 1000
                     # Run the pattern similarity test
+                    curr_pattern = PatternCache.patt.copy()
                     simScore = find_pattern_similarity()
                     self.discovery_sock.send_json(MessageFormatter.parse_log(
                         self.__class__.__name__,
@@ -109,7 +110,7 @@ class PatternRecogProc(Process) :
                         ))
 
                         self.pattern2cloud.send_json(MessageFormatter.parse_data_transfer(
-                            pattern=PatternCache.patt,
+                            pattern=curr_pattern,
                             verdict=str(simVerdict),
                             timestamp=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
                             tOffset=int(t_diff),
