@@ -13,7 +13,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
     while True :
         socks = dict(poller.poll(timeout=0.1))
         try :
-            async with aiomqtt.Client(config.MQTT_HOST,timeout=100) as client :
+            async with aiomqtt.Client(config.MQTT_HOST) as client :
                 if pattern2cloud_sock in socks :
                     recv_data = pattern2cloud_sock.recv_json()
                     await client.publish(
