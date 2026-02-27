@@ -86,7 +86,7 @@ class PatternRecogProc(Process) :
                             else :
                                 PatternCache.patt[PatternCache.currentIdx] = t_diff
                                 PatternCache.currentIdx = (PatternCache.currentIdx + 1) % config.PATTERN_BUFFER_SIZE
-                                PatternCache.on_timestamp = time.time() * 1000
+                                # PatternCache.on_timestamp = time.time() * 1000
                     # Run the pattern similarity test
                     curr_pattern = PatternCache.patt.copy()
                     simScore = find_pattern_similarity()
