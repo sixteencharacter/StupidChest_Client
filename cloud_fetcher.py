@@ -17,10 +17,10 @@ class RuntimeConfig :
 # Asyncio Task Loop
 async def listen_cloud_config(discovery_sock : zmq.SyncSocket,cloud2patt_socket : zmq.SyncSocket) :
     try :
-        while True :
-            try :
+        async with Client(config.MQTT_HOST,timeout=1000) as client:
+            while True :
+                try :
                 # TODO : listen to pattern change from cloud
-                async with Client(config.MQTT_HOST,timeout=1000) as client:
                     await client.subscribe(f"knocklock/v1/devices/{config.DEVICE_ID}/config/#")
                     async for msg in client.messages :
                         if RuntimeConfig.configuration is not None :
@@ -34,9 +34,10 @@ async def listen_cloud_config(discovery_sock : zmq.SyncSocket,cloud2patt_socket 
                                 type="PARAMETERS",
                                 payload = RuntimeConfig.configuration["desired"]["data"]
                             ))
-            except Exception as e :
-                print(e)
-            asyncio.sleep(1)
+                except Exception as e :
+                    print(e)
+                    
+                asyncio.sleep(0)
     except KeyboardInterrupt:
         pass # Graceful Shutdown
 

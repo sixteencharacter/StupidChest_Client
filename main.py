@@ -26,7 +26,7 @@ def setup_subscriber() -> Tuple[zmq.Context,zmq.SyncSocket] :
 
 def start_processes() :
     global processes
-    processes.append(SerialBrokerProc())
+    processes.append(SerialBrokerProc(useMockMode=True))
     processes.append(PC2SerialProc())
     processes.append(PatternRecogProc())
     processes.append(CloudWorkerProc())

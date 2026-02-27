@@ -10,10 +10,10 @@ import datetime
 
 # Async Task Loop
 async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.SyncSocket) :
-    while True :
-        socks = dict(poller.poll(timeout=0.1))
-        try :
-            async with aiomqtt.Client(config.MQTT_HOST) as client :
+    async with aiomqtt.Client(config.MQTT_HOST,timeout=100) as client :
+        while True :
+            socks = dict(poller.poll(timeout=0.1))
+            try :
                 if pattern2cloud_sock in socks :
                     recv_data = pattern2cloud_sock.recv_json()
                     await client.publish(
@@ -27,7 +27,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                                 "matched" : recv_data["payload"]["verdict"]
                             }
                         }),
-                        qos=1
+                        qos=2
                     )
                     await client.publish(
                         'knocklock/v1/devices/{}/api/logs'.format(config.DEVICE_ID),
@@ -37,12 +37,12 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                                 "ts" : datetime.datetime.now().isoformat()
                             },
                             "data" : {
-                               "level" : "debug",
-                               "message" : f"Verdict : {recv_data["payload"]["verdict"]} | {str(recv_data["payload"]["pattern"])}",
-                               "module" : "main"
+                                "level" : "debug",
+                                "message" : f"Verdict : {recv_data["payload"]["verdict"]} | {str(recv_data["payload"]["pattern"])}",
+                                "module" : "main"
                             }
                         }),
-                        qos=1
+                        qos=0
                     )
                     await client.publish(
                         'knocklock/v1/devices/{}/api/knock/live'.format(config.DEVICE_ID),
@@ -58,12 +58,13 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                                 }]
                             }
                         }),
-                        qos=1
+                        qos=0
                     )
                     
-        except Exception as e :
-            print(e)
-        time.sleep(0.1) 
+            except Exception as e :
+                print(e)
+                
+            asyncio.sleep(0)
 
 class CloudWorkerProc(Process) : 
     def __init__(self,*args,**kwargs) :

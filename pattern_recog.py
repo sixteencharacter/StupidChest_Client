@@ -72,22 +72,27 @@ class PatternRecogProc(Process) :
                     t_now = time.time() * 1000
                     t_diff = t_now - PatternCache.on_timestamp
                     if PatternConfig.config is not None :
-                        print("READ>",msg["payload"]["raw_data"])
+                        # print("READ>",msg["payload"]["raw_data"])
                         activation = msg["payload"]["raw_data"] > PatternConfig.config["activation_threshold"]
 
                         if activation :
 
                             if t_diff > PatternConfig.config["idle_cutoff_period"] :
                                 PatternCache.patt = [1e6] * config.PATTERN_BUFFER_SIZE
-                                PatternCache.on_timestamp = time.time() * 1000
                                 PatternCache.on_timestamp = t_now
                                 PatternCache.patt[0] = 0
                                 PatternCache.currentIdx = 1
+                            
+                            elif PatternCache.currentIdx == 0 :
+                                PatternCache.patt[0] = 0
+                                PatternCache.on_timestamp = t_now
+                                PatternCache.currentIdx = (PatternCache.currentIdx + 1) % config.PATTERN_BUFFER_SIZE
 
                             else :
                                 PatternCache.patt[PatternCache.currentIdx] = t_diff
                                 PatternCache.currentIdx = (PatternCache.currentIdx + 1) % config.PATTERN_BUFFER_SIZE
                                 PatternCache.on_timestamp = time.time() * 1000
+                    
                     # Run the pattern similarity test
                     curr_pattern = PatternCache.patt.copy()
                     simScore = find_pattern_similarity()
