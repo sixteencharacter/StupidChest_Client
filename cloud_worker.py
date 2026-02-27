@@ -11,7 +11,7 @@ import datetime
 # Async Task Loop
 async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.SyncSocket) :
     while True :
-        socks = dict(poller.poll(timeout=0.5))
+        socks = dict(poller.poll(timeout=0.1))
         try :
             async with aiomqtt.Client(config.MQTT_HOST,timeout=1000) as client :
                 if pattern2cloud_sock in socks :
