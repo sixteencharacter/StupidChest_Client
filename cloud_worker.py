@@ -27,7 +27,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                                 "matched" : recv_data["payload"]["verdict"]
                             }
                         }),
-                        qos=2
+                        qos=0
                     )
                     await client.publish(
                         'knocklock/v1/devices/{}/api/logs'.format(config.DEVICE_ID),
@@ -42,7 +42,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                                "module" : "main"
                             }
                         }),
-                        qos=2
+                        qos=0
                     )
                     await client.publish(
                         'knocklock/v1/devices/{}/api/knock/live'.format(config.DEVICE_ID),
@@ -58,7 +58,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                                 }]
                             }
                         }),
-                        qos=2
+                        qos=0
                     )
                     
         except Exception as e :
