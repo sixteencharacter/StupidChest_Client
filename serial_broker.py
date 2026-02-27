@@ -27,6 +27,7 @@ class SerialBrokerProc(Process) :
         self.poller = zmq.Poller()
         self.poller.register(self.writeSocket , zmq.POLLIN)
         try:
+            i = 0
             while True :
                 socks = dict(self.poller.poll(timeout=0.1))
                 try :
@@ -38,9 +39,13 @@ class SerialBrokerProc(Process) :
                         if np.random.random() < 0.05 : time.sleep(5)
                         dat = int(np.random.choice(np.arange(1,1024),size=1)[0])
                         print(dat)
+                        time.sleep(1)
+                        i += 1
                         if dat > 300 :
                             self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
-                    
+                        if i > 2 : 
+                            time.sleep(3)
+                            i = 0
                     if self.writeSocket in socks :
                         self.writeSocket.recv()
                         if hasattr(self,'serial_conn') :
