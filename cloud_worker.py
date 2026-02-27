@@ -13,7 +13,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
     while True :
         socks = dict(poller.poll(timeout=0.1))
         try :
-            async with aiomqtt.Client(config.MQTT_HOST,timeout=1000) as client :
+            async with aiomqtt.Client(config.MQTT_HOST,timeout=100) as client :
                 if pattern2cloud_sock in socks :
                     recv_data = pattern2cloud_sock.recv_json()
                     await client.publish(
@@ -27,7 +27,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                                 "matched" : recv_data["payload"]["verdict"]
                             }
                         }),
-                        qos=0
+                        qos=1
                     )
                     await client.publish(
                         'knocklock/v1/devices/{}/api/logs'.format(config.DEVICE_ID),
@@ -42,7 +42,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                                "module" : "main"
                             }
                         }),
-                        qos=0
+                        qos=1
                     )
                     await client.publish(
                         'knocklock/v1/devices/{}/api/knock/live'.format(config.DEVICE_ID),
@@ -58,7 +58,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                                 }]
                             }
                         }),
-                        qos=0
+                        qos=1
                     )
                     
         except Exception as e :
