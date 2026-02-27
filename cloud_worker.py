@@ -7,8 +7,26 @@ import asyncio
 import aiomqtt
 import json
 import datetime
+import asyncio
 
 # Async Task Loop
+
+async def send_delayed_close_signal(client : aiomqtt.Client) :
+    await asyncio.sleep(2)    
+    await client.publish(
+        'knocklock/v1/devices/{}/api/knock/result'.format(config.DEVICE_ID),
+        json.dumps({
+            "meta" : {
+                "schema_" : "knock_result/v1-e",
+                "ts" : datetime.datetime.now().isoformat()
+            },
+            "data" : {
+                "matched" : False
+            }
+        }),
+        qos=2
+    )
+
 async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.SyncSocket) :
     async with aiomqtt.Client(config.MQTT_HOST,timeout=100) as client :
         while True :
@@ -29,6 +47,11 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
                         }),
                         qos=2
                     )
+                    if recv_data["payload"]["verdict"] == str(True) :
+                        print("Posting an end signal")
+                        task = asyncio.create_task(send_delayed_close_signal(client))
+                        await task
+
                     await client.publish(
                         'knocklock/v1/devices/{}/api/logs'.format(config.DEVICE_ID),
                         json.dumps({
@@ -64,7 +87,7 @@ async def upload_data_to_cloud(poller : zmq.Poller , pattern2cloud_sock : zmq.Sy
             except Exception as e :
                 print(e)
                 
-            asyncio.sleep(0)
+            await asyncio.sleep(0)
 
 class CloudWorkerProc(Process) : 
     def __init__(self,*args,**kwargs) :
