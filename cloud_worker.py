@@ -12,7 +12,7 @@ import asyncio
 # Async Task Loop
 
 async def send_delayed_close_signal(client : aiomqtt.Client) :
-    await asyncio.sleep(2)    
+    await asyncio.sleep(config.DUMMY_LEASE_TIME)    
     await client.publish(
         'knocklock/v1/devices/{}/api/knock/result'.format(config.DEVICE_ID),
         json.dumps({
