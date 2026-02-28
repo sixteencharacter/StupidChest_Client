@@ -32,9 +32,9 @@ class SerialBrokerProc(Process) :
                 socks = dict(self.poller.poll(timeout=0.1))
                 try :
                     
-                    # if hasattr(self,'serial_conn') and self.serial_conn.in_waiting > 0  :
-                    dat = int(self.serial_conn.readline().decode("utf-8",errors='ignore').rstrip())
-                    self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
+                    if self.serial_conn.in_waiting > 0  :
+                        dat = int(self.serial_conn.readline().decode("utf-8",errors='ignore').rstrip())
+                        self.serial2pattern_sock.send_json(MessageFormatter.parse_data_transfer(raw_data=dat))
                     # else :
                     #     if np.random.random() < 0.05 : time.sleep(5)
                     #     dat = int(np.random.choice(np.arange(1,1024),size=1)[0])
@@ -54,6 +54,6 @@ class SerialBrokerProc(Process) :
                         print("Socket write req sent !")
                 except Exception as e:
                     print(e)
-                time.sleep(0.1)
+                time.sleep(0.05)
         except KeyboardInterrupt :
             pass
