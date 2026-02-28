@@ -37,7 +37,7 @@ async def listen_cloud_config(discovery_sock : zmq.SyncSocket,cloud2patt_socket 
                 except Exception as e :
                     print(e)
                     
-                asyncio.sleep(0)
+                await asyncio.sleep(0)
     except KeyboardInterrupt:
         pass # Graceful Shutdown
 
