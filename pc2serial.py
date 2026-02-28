@@ -28,14 +28,14 @@ class PC2SerialProc(Process) :
                 while True :
                     msg = self.pc2serialIn.recv_json()
                     if msg["payload"]["command"] == "unlock" :
-                        # if time.time() * 1000 - SerialConfig.last_sent_time > 5000 :
-                        self.writeSocket.send_json(MessageFormatter.parse_data_transfer(command="unlock"))
-                        self.discovery_sock.send_json(MessageFormatter.parse_log(
-                            self.__class__.__name__,
-                            "Box unlock signal sent!"
-                        ))                
-                            # SerialConfig.last_sent_time = time.time() * 1000
-                    time.sleep(0.05) 
+                        if time.time() * 1000 - SerialConfig.last_sent_time > 5000 :
+                            self.writeSocket.send_json(MessageFormatter.parse_data_transfer(command="unlock"))
+                            self.discovery_sock.send_json(MessageFormatter.parse_log(
+                                self.__class__.__name__,
+                                "Box unlock signal sent!"
+                            ))                
+                            SerialConfig.last_sent_time = time.time() * 1000
+                    time.sleep(0.5) 
             except KeyboardInterrupt :
                 pass 
             except Exception as e :

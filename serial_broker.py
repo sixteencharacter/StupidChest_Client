@@ -51,6 +51,7 @@ class SerialBrokerProc(Process) :
                         # if hasattr(self,'serial_conn') :
                         self.serial_conn.write(config.UNLOCK_COMMAND.encode())
                         self.serial_conn.reset_output_buffer()
+                        print("Socket write req sent !")
                 except Exception as e:
                     print(e)
                 time.sleep(0.1)
